@@ -7,6 +7,7 @@ import datetime
 from homeassistant.components.number import (
     NumberEntityDescription,
     NumberExtraStoredData,
+    NumberMode,
     RestoreNumber,
 )
 from homeassistant.config_entries import ConfigEntry
@@ -67,13 +68,12 @@ class FenotekNumber(CoordinatorEntity, RestoreNumber):
         self._attr_native_min_value = 1
         self._attr_entity_category = EntityCategory.CONFIG
         self._attr_native_step = 1
-        # self._attr_native_value = 10
+        self._attr_mode = NumberMode.BOX
         self.native_unit_of_measurement = "seconds"
         self.entity_description = NumberEntityDescription(  # type: ignore[call-arg]
             key="update_interval",
             translation_key="update_interval",
         )
-        # self._attr_name
 
     @property
     def native_value(self) -> float | None:

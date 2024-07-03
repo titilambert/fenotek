@@ -1,0 +1,14 @@
+{
+  "domain": "fenotek",
+  "name": "fenotek",
+  "codeowners": [
+    "@titilambert"
+  ],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://gitlab.com/ttblt-oss/hass/fenotek",
+  "issue_tracker": "https://gitlab.com/ttblt-oss/hass/fenotek/issues",
+  "iot_class": "cloud_polling",
+  "version": "0.1.0",
+  "requirements": []
+}

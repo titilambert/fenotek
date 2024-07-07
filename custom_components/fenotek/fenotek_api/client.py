@@ -8,8 +8,10 @@ import aiohttp
 from .api_reponse import (
     LoginResponse,
     PingResponse,
+    VisiophoneHomeNotificationResponse,
     VisiophoneHomeResponse,
     VisiophoneResponse,
+    VisiophonesNotificationsResponse,
     VisiophonesResponse,
 )
 from .consts import (
@@ -19,6 +21,7 @@ from .consts import (
     FENOTEK_URL,
     FENOTEK_VISIONPHONE,
     FENOTEK_VISIONPHONE_HOME,
+    FENOTEK_VISIONPHONE_NOTIFICATIONS,
     FENOTEK_VISIONPHONES,
 )
 
@@ -181,3 +184,16 @@ class FenotekClient:
         res = await self._websession.get(url)
         content = await res.read()
         return content
+
+    async def notifications(
+        self, doorbell_id: str
+    ) -> list[VisiophoneHomeNotificationResponse]:
+        """Get doorbell notifications."""
+        json_res = cast(
+            VisiophonesNotificationsResponse,
+            await self._http_request(
+                method="get",
+                path=FENOTEK_VISIONPHONE_NOTIFICATIONS.format(doorbell_id),
+            ),
+        )
+        return json_res["notifications"]

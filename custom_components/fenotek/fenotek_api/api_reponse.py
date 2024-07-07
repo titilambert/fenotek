@@ -135,8 +135,17 @@ class VisiophoneHomeNotificationDetailResponse(TypedDict):
     """Subdata notification detail VisiophoneHome query HTTP response."""
 
     type: int
+    # 0: motion with photo
+    # 6: doorbell ring
+    # 8: call creation
+    # 10: dry contact activation
+    # 11: motion with video
+    # 13: doorbell reachable
     label: str
     url: str
+    triggeredBy: str
+    name: str
+    download: NotRequired[str]
     videoUrl: NotRequired[str]
 
 
@@ -145,6 +154,7 @@ class VisiophoneHomeNotificationResponse(TypedDict):
 
     vuid: str
     type: str
+    # notification or missedcall or drycontact or connected
     detail: VisiophoneHomeNotificationDetailResponse
     expireAt: str
     _id: str
@@ -174,3 +184,12 @@ class DrycontactActivateResponse(TypedDict):
     error: str
     schemaError: SchemaError
     success: bool
+
+
+# Visiophone Notifications
+class VisiophonesNotificationsResponse(TypedDict):
+    """Doorbell notifications query HTTP response."""
+
+    page: int
+    pages: int
+    notifications: list[VisiophoneHomeNotificationResponse]

@@ -2,7 +2,11 @@
 
 from datetime import datetime
 
-from .api_reponse import VisiophoneHomeResponse, VisiophoneResponse
+from .api_reponse import (
+    VisiophoneHomeNotificationResponse,
+    VisiophoneHomeResponse,
+    VisiophoneResponse,
+)
 from .client import FenotekClient
 from .dry_contact import DryContact
 
@@ -21,11 +25,13 @@ class Doorbell:
         self._camera = None
         self._dry_contacts: list[DryContact] = []
         self._available = False
+        self._notifications: list[VisiophoneHomeNotificationResponse] = []
 
     async def update(self) -> None:
         """Update doorbell data."""
         self._raw_data = await self._fenotek_client.get_doorbell(self.id_)
         self._raw_home = await self._fenotek_client.home(self.id_)
+        self._notifications = await self._fenotek_client.notifications(self.id_)
         self._camera_image = await self._fenotek_client.fetch_camera_image(
             self._raw_home["lastNotification"]["detail"]["url"]
         )
@@ -39,6 +45,11 @@ class Doorbell:
         """Doorbell ping."""
         self._available = await self._fenotek_client.ping(self.id_)
         return self._available
+
+    @property
+    def notifications(self) -> list[VisiophoneHomeNotificationResponse]:
+        """Doorbell notifications."""
+        return self._notifications
 
     @property
     def available(self) -> bool:

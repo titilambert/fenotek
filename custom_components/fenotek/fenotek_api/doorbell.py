@@ -1,6 +1,10 @@
 """Doorbell module."""
 
-from .api_reponse import VisiophoneHomeResponse, VisiophoneResponse
+from .api_reponse import (
+    VisiophoneHomeNotificationResponse,
+    VisiophoneHomeResponse,
+    VisiophoneResponse,
+)
 from .client import FenotekClient
 from .dry_contact import DryContact
 from .notification import Notification, NotificationSubType, NotificationType
@@ -11,6 +15,7 @@ class Doorbell:
 
     _raw_data: VisiophoneResponse
     _raw_home: VisiophoneHomeResponse
+    _raw_notifications: list[VisiophoneHomeNotificationResponse]
 
     def __init__(self, fenotek_client: FenotekClient, id_: str) -> None:
         """Doorbell class constructor."""
@@ -27,7 +32,10 @@ class Doorbell:
         self._raw_home = await self._fenotek_client.home(self.id_)
         raw_notifications = await self._fenotek_client.notifications(self.id_)
         self._notifications = []
+        print(len(raw_notifications))
+        i = 0
         for raw_notification in raw_notifications:
+            print(i)
             notification = Notification.new(self._fenotek_client, raw_notification)
             if notification.sub_type in (
                 NotificationSubType.ANSWERED_CALL,
@@ -35,6 +43,9 @@ class Doorbell:
             ):
                 await notification.fetch_details_url()
             self._notifications.append(notification)
+            i += 1
+        self._notifications.sort(key=lambda x: x.created_at)
+        print(self._notifications)
 
         if not self._dry_contacts:
             for dry_contact_data in self._raw_data["dryContacts"]:
@@ -95,38 +106,32 @@ class Doorbell:
 
     @property
     def calls(self) -> list[Notification]:
-        """Return all the answered called notifications."""
-        return sorted(
-            [
-                notif
-                for notif in self._notifications
-                if notif.type_ == NotificationType.CALL
-            ],
-            key=lambda x: x.created_at,
-        )
+        """Return all the answered call notifications."""
+        return [
+            notif
+            for notif in self._notifications
+            if notif.type_ == NotificationType.CALL
+        ]
 
     @property
     def last_call(self) -> Notification | None:
-        """Return the last answered called notification."""
+        """Return the last answered call notification."""
         if self.calls:
             return self.calls[-1]
         return None
 
     @property
     def missed_calls(self) -> list[Notification]:
-        """Return all the missed called notifications."""
-        return sorted(
-            [
-                notif
-                for notif in self._notifications
-                if notif.type_ == NotificationType.MISSED_CALL
-            ],
-            key=lambda x: x.created_at,
-        )
+        """Return all the missed call notifications."""
+        return [
+            notif
+            for notif in self._notifications
+            if notif.type_ == NotificationType.MISSED_CALL
+        ]
 
     @property
     def last_missed_call(self) -> Notification | None:
-        """Return the last missed called notification."""
+        """Return the last missed call notification."""
         if self.missed_calls:
             return self.missed_calls[-1]
         return None
@@ -134,14 +139,11 @@ class Doorbell:
     @property
     def activations(self) -> list[Notification]:
         """Return all the activate notifications."""
-        return sorted(
-            [
-                notif
-                for notif in self._notifications
-                if notif.type_ == NotificationType.DRY_CONTACT
-            ],
-            key=lambda x: x.created_at,
-        )
+        return [
+            notif
+            for notif in self._notifications
+            if notif.type_ == NotificationType.DRY_CONTACT
+        ]
 
     @property
     def last_activate(self) -> Notification | None:
@@ -153,19 +155,7 @@ class Doorbell:
     @property
     def notifications(self) -> list[Notification]:
         """Return all notifications."""
-        return sorted(
-            [
-                notif
-                for notif in self._notifications
-                if notif.sub_type
-                in (
-                    NotificationSubType.MOTION_VIDEO,
-                    NotificationSubType.MISSED_CALL,
-                    NotificationSubType.ANSWERED_CALL,
-                )
-            ],
-            key=lambda x: x.created_at,
-        )
+        return [notif for notif in self._notifications]
 
     @property
     def last_notification(self) -> Notification | None:
@@ -177,14 +167,11 @@ class Doorbell:
     @property
     def motions(self) -> list[Notification]:
         """Return all the motion notifications."""
-        return sorted(
-            [
-                notif
-                for notif in self._notifications
-                if notif.sub_type == NotificationSubType.MOTION_VIDEO
-            ],
-            key=lambda x: x.created_at,
-        )
+        return [
+            notif
+            for notif in self._notifications
+            if notif.sub_type == NotificationSubType.MOTION_VIDEO
+        ]
 
     @property
     def last_motion(self) -> Notification | None:

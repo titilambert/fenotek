@@ -12,7 +12,6 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN
 from .coordinator import FenotekDataUpdateCoordinator
 from .fenotek_api.doorbell import Doorbell
-from .fenotek_api.notification import NotificationSubType
 
 
 async def async_setup_entry(
@@ -74,11 +73,9 @@ class FenotekSensor(CoordinatorEntity, SensorEntity):
     def _handle_coordinator_update(self) -> None:
         """Handle data update."""
         notifs = [
-            n
-            for n in self._doorbell.notifications
-            if n.sub_type == NotificationSubType.ACTIVATION
-            and n.label == self._dry_contact_name
+            n for n in self._doorbell.activations if n.label == self._dry_contact_name
         ]
         if notifs:
             self._attr_native_value = notifs[-1].created_at
+        self.async_write_ha_state()
         super()._handle_coordinator_update()

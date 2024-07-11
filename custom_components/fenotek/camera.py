@@ -1,13 +1,9 @@
-"""Support for the Environment Canada radar imagery."""
+"""Support for Fenotek video recordings."""
 
 from __future__ import annotations
 
 from homeassistant.components import ffmpeg
-from homeassistant.components.camera import (
-    Camera,
-    CameraEntityDescription,
-    CameraEntityFeature,
-)
+from homeassistant.components.camera import Camera, CameraEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceInfo
@@ -34,15 +30,8 @@ async def async_setup_entry(
         async_add_entities([FenotekCameraLastEvent(coordinator, hass, doorbell)])
 
 
-IMAGE_TYPE = CameraEntityDescription(  # type: ignore[call-arg]
-    key="last_motion_image",
-    translation_key="last_motion_image",
-)
-
-
 class FenotekCamera(CoordinatorEntity, Camera):
-    # class FenotekCamera(CoordinatorEntity, Camera):
-    """Implementation of an Environment Canada radar camera."""
+    """Implementation of Fenotek video recording."""
 
     _last_notif: Notification | None = None
 
@@ -63,13 +52,7 @@ class FenotekCamera(CoordinatorEntity, Camera):
         self._doorbell = doorbell
         self._image: bytes | None = None
 
-        # self.radar_object = coordinator.ec_data
-        # self._attr_unique_id = f"{doorbell.id_}-camera"
-        # self._attr_attribution = self.radar_object.metadata["attribution"]
-        # self._attr_entity_registry_enabled_default = False
-
         device_info = DeviceInfo(
-            # config_entry_id=coordinator.config_entry.entry_id,
             connections=doorbell.connections,
             identifiers={(DOMAIN, doorbell.identifiers)},
             name=doorbell.name,

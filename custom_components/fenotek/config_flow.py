@@ -1,4 +1,4 @@
-"""Config flow for chihiros integration."""
+"""Config flow for fenotek integration."""
 
 from __future__ import annotations
 

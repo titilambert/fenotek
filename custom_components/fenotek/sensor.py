@@ -1,4 +1,4 @@
-"""Support for the Environment Canada radar imagery."""
+"""Support for fenotek sensors."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Add a weather entity from a config_entry."""
+    """Add sensor entities from a config_entry."""
     coordinator: FenotekDataUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id]
     for doorbell in coordinator.fenotek_account.doorbells:
         for dry_contact in doorbell.dry_contacts:
@@ -30,7 +30,7 @@ async def async_setup_entry(
 
 
 class FenotekSensor(CoordinatorEntity, SensorEntity):
-    """Implementation of an Environment Canada radar camera."""
+    """Implementation of datetime sensors repesenting last dry contact activator."""
 
     # _attr_has_entity_name = True
     _attr_device_class = SensorDeviceClass.TIMESTAMP
@@ -43,19 +43,15 @@ class FenotekSensor(CoordinatorEntity, SensorEntity):
         doorbell: Doorbell,
         dry_contact_name: str,
     ) -> None:
-        """Initialize the camera."""
+        """Initialize the datetime sensor."""
         super().__init__(coordinator)
         SensorEntity.__init__(self)
         self._doorbell = doorbell
         self._dry_contact_name = dry_contact_name
 
-        # self.radar_object = coordinator.ec_data
         self._attr_unique_id = f"{doorbell.id_}-{dry_contact_name}-last-activation"
-        # self._attr_attribution = self.radar_object.metadata["attribution"]
-        # self._attr_entity_registry_enabled_default = False
 
         device_info = DeviceInfo(
-            # config_entry_id=coordinator.config_entry.entry_id,
             connections=doorbell.connections,
             identifiers={(DOMAIN, doorbell.identifiers)},
             name=doorbell.name,

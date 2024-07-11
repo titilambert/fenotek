@@ -1,4 +1,4 @@
-"""Support for the Environment Canada radar imagery."""
+"""Support for Fenotek dry contact activation button."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Add a weather entity from a config_entry."""
+    """Add buttons entities from a config_entry."""
     coordinator: FenotekDataUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id]
     for doorbell in coordinator.fenotek_account.doorbells:
         for dry_contact in doorbell.dry_contacts:
@@ -29,7 +29,7 @@ async def async_setup_entry(
 
 
 class FenotekButton(CoordinatorEntity, ButtonEntity):
-    """Implementation of an Environment Canada radar camera."""
+    """Implementation of dry contact activation button."""
 
     _attr_has_entity_name = True
 
@@ -39,7 +39,7 @@ class FenotekButton(CoordinatorEntity, ButtonEntity):
         doorbell: Doorbell,
         dry_contact: DryContact,
     ):
-        """Initialize the camera."""
+        """Initialize the button."""
         super().__init__(coordinator)
         ButtonEntity.__init__(self)
         self._dry_contact = dry_contact
@@ -49,7 +49,6 @@ class FenotekButton(CoordinatorEntity, ButtonEntity):
         self._attr_delay = dry_contact.delay
 
         device_info = DeviceInfo(
-            # config_entry_id=coordinator.config_entry.entry_id,
             connections=doorbell.connections,
             identifiers={(DOMAIN, doorbell.identifiers)},
             name=doorbell.name,
@@ -61,7 +60,6 @@ class FenotekButton(CoordinatorEntity, ButtonEntity):
 
         self._attr_device_info = device_info
 
-        # FIX ENTITYNAME
         self._attr_name = f"{doorbell.id_}-{dry_contact.name}"
         self._attr_icon = ICON_MAPPING.get(dry_contact.icon, None)
 

@@ -71,6 +71,7 @@ class FenotekImage(CoordinatorEntity, ImageEntity):
 
     @callback
     def _handle_coordinator_update(self) -> None:
+        """Handle data update."""
         if (
             self._doorbell.last_ring
             and self._attr_image_url != self._doorbell.last_ring.url

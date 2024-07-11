@@ -67,8 +67,14 @@ class FenotekButton(CoordinatorEntity, ButtonEntity):
         """Handle the button press."""
         try:
             await self._dry_contact.activate()
-        except Exception as err:
-            raise HomeAssistantError(f"Can not activate dry contact: {err}") from err
+        except Exception:
+            try:
+                await self.coordinator.fenotek_account.login()
+                await self._dry_contact.activate()
+            except Exception as err:
+                raise HomeAssistantError(
+                    f"Can not activate dry contact: {err}"
+                ) from err
 
     @property
     def available(self) -> bool:

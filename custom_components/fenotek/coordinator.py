@@ -38,8 +38,12 @@ class FenotekDataUpdateCoordinator(
         ret: dict[str, Doorbell] = {}
         try:
             await self.fenotek_account.update()
-        except Exception as ex:
-            raise UpdateFailed(f"Error fetching {self.name} data: {ex}") from ex
+        except Exception:
+            try:
+                await self.fenotek_account.login()
+                await self.fenotek_account.update()
+            except Exception as exp:
+                raise UpdateFailed(f"Error fetching {self.name} data: {exp}") from exp
         for doorbell in self.fenotek_account.doorbells:
             await doorbell.ping()
             ret[doorbell.id_] = doorbell

@@ -141,12 +141,15 @@ class VisiophoneHomeNotificationDetailResponse(TypedDict):
     # 10: dry contact activation
     # 11: motion with video
     # 13: doorbell reachable
-    label: str
-    url: str
-    triggeredBy: str
-    name: str
+    label: NotRequired[str]
+    url: NotRequired[str]
+    triggeredBy: NotRequired[str]
+    name: NotRequired[str]
     download: NotRequired[str]
     videoUrl: NotRequired[str]
+    room: NotRequired[str]
+    recorded: NotRequired[bool]
+    answeredBy: NotRequired[str]
 
 
 class VisiophoneHomeNotificationResponse(TypedDict):

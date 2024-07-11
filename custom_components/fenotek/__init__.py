@@ -21,7 +21,8 @@ from .fenotek_api.doorbell import Doorbell
 DEFAULT_UPDATE_INTERVAL = timedelta(minutes=5)
 DEFAULT_UPDATE_INTERVAL = timedelta(seconds=20)
 # PLATFORMS = [Platform.CAMERA, Platform.BUTTON]
-PLATFORMS = [Platform.IMAGE, Platform.NUMBER, Platform.BUTTON]
+# PLATFORMS = [Platform.IMAGE, Platform.NUMBER, Platform.BUTTON, Platform.CAMERA]
+PLATFORMS = [Platform.NUMBER, Platform.BUTTON, Platform.CAMERA, Platform.SENSOR]
 
 _LOGGER = logging.getLogger(__name__)
 

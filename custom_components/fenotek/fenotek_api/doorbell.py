@@ -1,14 +1,9 @@
 """Doorbell module."""
 
-from datetime import datetime
-
-from .api_reponse import (
-    VisiophoneHomeNotificationResponse,
-    VisiophoneHomeResponse,
-    VisiophoneResponse,
-)
+from .api_reponse import VisiophoneHomeResponse, VisiophoneResponse
 from .client import FenotekClient
 from .dry_contact import DryContact
+from .notification import Notification, NotificationSubType, NotificationType
 
 
 class Doorbell:
@@ -16,7 +11,6 @@ class Doorbell:
 
     _raw_data: VisiophoneResponse
     _raw_home: VisiophoneHomeResponse
-    _camera_image: bytes
 
     def __init__(self, fenotek_client: FenotekClient, id_: str) -> None:
         """Doorbell class constructor."""
@@ -25,16 +19,23 @@ class Doorbell:
         self._camera = None
         self._dry_contacts: list[DryContact] = []
         self._available = False
-        self._notifications: list[VisiophoneHomeNotificationResponse] = []
+        self._notifications: list[Notification] = []
 
     async def update(self) -> None:
         """Update doorbell data."""
         self._raw_data = await self._fenotek_client.get_doorbell(self.id_)
         self._raw_home = await self._fenotek_client.home(self.id_)
-        self._notifications = await self._fenotek_client.notifications(self.id_)
-        self._camera_image = await self._fenotek_client.fetch_camera_image(
-            self._raw_home["lastNotification"]["detail"]["url"]
-        )
+        raw_notifications = await self._fenotek_client.notifications(self.id_)
+        self._notifications = []
+        for raw_notification in raw_notifications:
+            notification = Notification.new(self._fenotek_client, raw_notification)
+            if notification.sub_type in (
+                NotificationSubType.ANSWERED_CALL,
+                NotificationSubType.MISSED_CALL,
+            ):
+                await notification.fetch_details_url()
+            self._notifications.append(notification)
+
         if not self._dry_contacts:
             for dry_contact_data in self._raw_data["dryContacts"]:
                 self._dry_contacts.append(
@@ -45,11 +46,6 @@ class Doorbell:
         """Doorbell ping."""
         self._available = await self._fenotek_client.ping(self.id_)
         return self._available
-
-    @property
-    def notifications(self) -> list[VisiophoneHomeNotificationResponse]:
-        """Doorbell notifications."""
-        return self._notifications
 
     @property
     def available(self) -> bool:
@@ -98,26 +94,101 @@ class Doorbell:
         return self._raw_data["hiVersion"]
 
     @property
-    def last_notification_url(self) -> str:
-        """Last notification url."""
-        return self._raw_home["lastNotification"]["detail"]["url"]
+    def calls(self) -> list[Notification]:
+        """Return all the answered called notifications."""
+        return sorted(
+            [
+                notif
+                for notif in self._notifications
+                if notif.type_ == NotificationType.CALL
+            ],
+            key=lambda x: x.created_at,
+        )
 
     @property
-    def last_notification_date(self) -> datetime:
-        """Last notification date."""
-        date_str = self._raw_home["lastNotification"]["createdAt"].split(".")[0]
-        return datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S")
+    def last_call(self) -> Notification | None:
+        """Return the last answered called notification."""
+        if self.calls:
+            return self.calls[-1]
+        return None
 
     @property
-    def last_notification_type(self) -> str:
-        """Last notification type."""
-        type_id = self._raw_home["lastNotification"]["detail"]["type"]
-        type_mapping = {
-            0: "ZERO",
-        }
-        return type_mapping.get(type_id, f"unknown - {type_id}")
+    def missed_calls(self) -> list[Notification]:
+        """Return all the missed called notifications."""
+        return sorted(
+            [
+                notif
+                for notif in self._notifications
+                if notif.type_ == NotificationType.MISSED_CALL
+            ],
+            key=lambda x: x.created_at,
+        )
 
     @property
-    def last_notification_image(self) -> bytes | None:
-        """Last notification image."""
-        return self._camera_image
+    def last_missed_call(self) -> Notification | None:
+        """Return the last missed called notification."""
+        if self.missed_calls:
+            return self.missed_calls[-1]
+        return None
+
+    @property
+    def activations(self) -> list[Notification]:
+        """Return all the activate notifications."""
+        return sorted(
+            [
+                notif
+                for notif in self._notifications
+                if notif.type_ == NotificationType.DRY_CONTACT
+            ],
+            key=lambda x: x.created_at,
+        )
+
+    @property
+    def last_activate(self) -> Notification | None:
+        """Return the last activation notification."""
+        if self.activations:
+            return self.activations[-1]
+        return None
+
+    @property
+    def notifications(self) -> list[Notification]:
+        """Return all notifications."""
+        return sorted(
+            [
+                notif
+                for notif in self._notifications
+                if notif.sub_type
+                in (
+                    NotificationSubType.MOTION_VIDEO,
+                    NotificationSubType.MISSED_CALL,
+                    NotificationSubType.ANSWERED_CALL,
+                )
+            ],
+            key=lambda x: x.created_at,
+        )
+
+    @property
+    def last_notification(self) -> Notification | None:
+        """Return the last notification."""
+        if self.notifications:
+            return self.notifications[-1]
+        return None
+
+    @property
+    def motions(self) -> list[Notification]:
+        """Return all the motion notifications."""
+        return sorted(
+            [
+                notif
+                for notif in self._notifications
+                if notif.sub_type == NotificationSubType.MOTION_VIDEO
+            ],
+            key=lambda x: x.created_at,
+        )
+
+    @property
+    def last_motion(self) -> Notification | None:
+        """Return the last motion notification."""
+        if self.motions:
+            return self.motions[-1]
+        return None

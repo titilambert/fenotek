@@ -2,13 +2,13 @@
 
 import logging
 from datetime import timedelta
-from typing import Any
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import DOMAIN
 from .fenotek_api.account import FenotekAccount
+from .fenotek_api.doorbell import Doorbell
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -29,13 +29,13 @@ class FenotekDataUpdateCoordinator(
         super().__init__(
             hass, _LOGGER, name=f"{DOMAIN} {name}", update_interval=update_interval
         )
-        self.fenotek_account = fenotek_account
-        self.last_update_success = False
-        self._available = False
+        self.fenotek_account: FenotekAccount = fenotek_account
+        self.last_update_success: bool = False
+        self._available: bool = False
 
-    async def _async_update_data(self) -> dict[str, Any]:
+    async def _async_update_data(self) -> dict[str, Doorbell]:
         """Fetch data from Fenotek."""
-        ret: dict[str, Any] = {}
+        ret: dict[str, Doorbell] = {}
         try:
             await self.fenotek_account.update()
         except Exception as ex:

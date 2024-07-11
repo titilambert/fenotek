@@ -72,10 +72,12 @@ class FenotekClient:
             raise
 
         try:
+            print(self.headers)
             res: aiohttp.ClientResponse = await getattr(self._websession, method)(
                 url, headers=self.headers, json=data
             )
         except Exception as exp:
+            print("Eself.headers")
             raise RuntimeError from exp
         if res.status != status_code:
             raise
@@ -179,8 +181,8 @@ class FenotekClient:
             return False
         return bool(json_res.get("success", False))
 
-    async def fetch_camera_image(self, url: str) -> bytes:
-        """Fetch camera image raw data."""
+    async def fetch_url(self, url: str) -> bytes:
+        """Fetch a basic url raw data."""
         res = await self._websession.get(url)
         content = await res.read()
         return content

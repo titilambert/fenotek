@@ -80,6 +80,7 @@ class FenotekCamera(CoordinatorEntity, Camera):
         )
 
         self._attr_device_info = device_info
+        self._set_last_notif()
 
     @property
     def available(self) -> bool:
@@ -109,12 +110,19 @@ class FenotekCamera(CoordinatorEntity, Camera):
             return None
         return self._last_notif.video_url
 
+    def _set_last_notif(self) -> None:
+        """Save last notification."""
+        raise NotImplementedError
+
     @callback
     def _handle_coordinator_update(self) -> None:
+        """Handle new data."""
         if self._last_notif:
+            print(self._last_notif.video_url)
             self._attr_extra_state_attributes["last_update"] = (
                 self._last_notif.created_at
             )
+        self.async_write_ha_state()
         super()._handle_coordinator_update()
 
 
@@ -126,11 +134,17 @@ class FenotekCameraLastEvent(FenotekCamera):
         """Return camera name."""
         return f"{self._doorbell.id_}-camera-last-event"
 
+    def _set_last_notif(self) -> None:
+        """Save last notification."""
+        notifs_with_video = [n for n in self._doorbell.notifications if n.video_url]
+        if not notifs_with_video:
+            return None
+        self._last_notif = notifs_with_video[-1]
+
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle new data."""
-        self._last_notif = self._doorbell.last_notification
-        self.async_write_ha_state()
+        self._set_last_notif()
         super()._handle_coordinator_update()
 
 
@@ -142,11 +156,14 @@ class FenotekCameraMotion(FenotekCamera):
         """Return camera name."""
         return f"{self._doorbell.id_}-camera-motion"
 
+    def _set_last_notif(self) -> None:
+        """Save last notification."""
+        self._last_notif = self._doorbell.last_motion
+
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle new data."""
-        self._last_notif = self._doorbell.last_motion
-        self.async_write_ha_state()
+        self._set_last_notif()
         super()._handle_coordinator_update()
 
 
@@ -158,11 +175,14 @@ class FenotekCameraMissedCall(FenotekCamera):
         """Return camera name."""
         return f"{self._doorbell.id_}-camera-missedcall"
 
+    def _set_last_notif(self) -> None:
+        """Save last notification."""
+        self._last_notif = self._doorbell.last_missed_call
+
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle new data."""
-        self._last_notif = self._doorbell.last_missed_call
-        self.async_write_ha_state()
+        self._set_last_notif()
         super()._handle_coordinator_update()
 
 
@@ -174,8 +194,12 @@ class FenotekCameraAnsweredCall(FenotekCamera):
         """Return camera name."""
         return f"{self._doorbell.id_}-camera-answeredcall"
 
+    def _set_last_notif(self) -> None:
+        """Save last notification."""
+        self._last_notif = self._doorbell.last_call
+
     @callback
     def _handle_coordinator_update(self) -> None:
-        self._last_notif = self._doorbell.last_call
-        self.async_write_ha_state()
+        """Handle new data."""
+        self._set_last_notif()
         super()._handle_coordinator_update()

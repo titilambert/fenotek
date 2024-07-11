@@ -146,3 +146,10 @@ class Notification:
         ):
             self._video_url = json.loads(data).get("data", {}).get("url", {})
         return data
+
+    def __repr__(self) -> str:
+        """Object representation."""
+        return (
+            f"""<Notification - {self._id} - {self.created_at}"""
+            f""" - {self.type_} - {self.sub_type}>"""
+        )

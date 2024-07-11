@@ -7,7 +7,7 @@ from .api_reponse import (
 )
 from .client import FenotekClient
 from .dry_contact import DryContact
-from .notification import Notification, NotificationSubType, NotificationType
+from .notification import Notification, NotificationSubType
 
 
 class Doorbell:
@@ -30,12 +30,11 @@ class Doorbell:
         """Update doorbell data."""
         self._raw_data = await self._fenotek_client.get_doorbell(self.id_)
         self._raw_home = await self._fenotek_client.home(self.id_)
-        raw_notifications = await self._fenotek_client.notifications(self.id_)
+        self._raw_notifications = await self._fenotek_client.notifications(self.id_)
         self._notifications = []
-        print(len(raw_notifications))
+        print(len(self._raw_notifications))
         i = 0
-        for raw_notification in raw_notifications:
-            print(i)
+        for raw_notification in self._raw_notifications:
             notification = Notification.new(self._fenotek_client, raw_notification)
             if notification.sub_type in (
                 NotificationSubType.ANSWERED_CALL,
@@ -110,7 +109,7 @@ class Doorbell:
         return [
             notif
             for notif in self._notifications
-            if notif.type_ == NotificationType.CALL
+            if notif.sub_type == NotificationSubType.ANSWERED_CALL
         ]
 
     @property
@@ -126,7 +125,7 @@ class Doorbell:
         return [
             notif
             for notif in self._notifications
-            if notif.type_ == NotificationType.MISSED_CALL
+            if notif.sub_type == NotificationSubType.MISSED_CALL
         ]
 
     @property
@@ -142,7 +141,7 @@ class Doorbell:
         return [
             notif
             for notif in self._notifications
-            if notif.type_ == NotificationType.DRY_CONTACT
+            if notif.sub_type == NotificationSubType.ACTIVATION
         ]
 
     @property
@@ -178,4 +177,20 @@ class Doorbell:
         """Return the last motion notification."""
         if self.motions:
             return self.motions[-1]
+        return None
+
+    @property
+    def rings(self) -> list[Notification]:
+        """Return all the rings notifications."""
+        return [
+            notif
+            for notif in self._notifications
+            if notif.sub_type == NotificationSubType.RING
+        ]
+
+    @property
+    def last_ring(self) -> Notification | None:
+        """Return the last ring notification."""
+        if self.rings:
+            return self.rings[-1]
         return None

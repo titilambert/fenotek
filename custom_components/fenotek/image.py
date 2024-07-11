@@ -1,4 +1,4 @@
-"""Support for the Environment Canada radar imagery."""
+"""Fenotek image module."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Add a weather entity from a config_entry."""
+    """Add a ring event imaeg from a config_entry."""
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
     for doorbell in coordinator.fenotek_account.doorbells:
         async_add_entities([FenotekImage(coordinator, hass, doorbell)])
@@ -32,7 +32,7 @@ IMAGE_TYPE = ImageEntityDescription(  # type: ignore[call-arg]
 
 
 class FenotekImage(CoordinatorEntity, ImageEntity):
-    """Implementation of an Environment Canada radar camera."""
+    """Implementation of a ring event photo."""
 
     def __init__(
         self,
@@ -40,7 +40,7 @@ class FenotekImage(CoordinatorEntity, ImageEntity):
         hass: HomeAssistant,
         doorbell: Doorbell,
     ) -> None:
-        """Initialize the camera."""
+        """Initialize the image."""
         super().__init__(coordinator)
         ImageEntity.__init__(self, hass)
         self._doorbell = doorbell

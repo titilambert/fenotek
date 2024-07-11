@@ -1,4 +1,4 @@
-"""Support for the Environment Canada radar imagery."""
+"""Fenotek number input module."""
 
 from __future__ import annotations
 
@@ -27,33 +27,29 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Add a weather entity from a config_entry."""
+    """Add a number input from a config_entry."""
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
     for doorbell in coordinator.fenotek_account.doorbells:
         async_add_entities([FenotekNumber(coordinator, doorbell)])
 
 
 class FenotekNumber(CoordinatorEntity, RestoreNumber):
-    """Implementation of an Environment Canada radar camera."""
+    """Implementation of number input."""
 
     # _attr_has_entity_name = True
 
     def __init__(
         self, coordinator: FenotekDataUpdateCoordinator, doorbell: Doorbell
     ) -> None:
-        """Initialize the camera."""
+        """Initialize the number input."""
         self.restored_data: NumberExtraStoredData | None = None
         super().__init__(coordinator)
         RestoreNumber.__init__(self)
         self._doorbell = doorbell
 
-        # self.radar_object = coordinator.ec_data
         self._attr_unique_id = f"{doorbell.id_}-update-interval"
-        # self._attr_attribution = self.radar_object.metadata["attribution"]
-        # self._attr_entity_registry_enabled_default = False
 
         device_info = DeviceInfo(
-            # config_entry_id=coordinator.config_entry.entry_id,
             connections=doorbell.connections,
             identifiers={(DOMAIN, doorbell.identifiers)},
             name=doorbell.name,

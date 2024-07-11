@@ -101,7 +101,6 @@ class FenotekCamera(CoordinatorEntity, Camera):
     def _handle_coordinator_update(self) -> None:
         """Handle new data."""
         if self._last_notif:
-            print(self._last_notif.video_url)
             self._attr_extra_state_attributes["last_update"] = (
                 self._last_notif.created_at
             )

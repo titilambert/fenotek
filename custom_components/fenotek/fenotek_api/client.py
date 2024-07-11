@@ -72,12 +72,10 @@ class FenotekClient:
             raise
 
         try:
-            print(self.headers)
             res: aiohttp.ClientResponse = await getattr(self._websession, method)(
                 url, headers=self.headers, json=data
             )
         except Exception as exp:
-            print("Eself.headers")
             raise RuntimeError from exp
         if res.status != status_code:
             raise
@@ -156,7 +154,6 @@ class FenotekClient:
             )
             assert isinstance(video_data_url, str)
             json_res2 = await self._http_request(method="get", path=video_data_url)
-            # print(json_res2)
             json_res["lastNotification"]["detail"]["videoUrl"] = json_res2["data"][
                 "url"
             ]

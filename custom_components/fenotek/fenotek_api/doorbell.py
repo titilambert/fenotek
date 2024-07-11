@@ -32,7 +32,6 @@ class Doorbell:
         self._raw_home = await self._fenotek_client.home(self.id_)
         self._raw_notifications = await self._fenotek_client.notifications(self.id_)
         self._notifications = []
-        print(len(self._raw_notifications))
         i = 0
         for raw_notification in self._raw_notifications:
             notification = Notification.new(self._fenotek_client, raw_notification)
@@ -44,7 +43,6 @@ class Doorbell:
             self._notifications.append(notification)
             i += 1
         self._notifications.sort(key=lambda x: x.created_at)
-        print(self._notifications)
 
         if not self._dry_contacts:
             for dry_contact_data in self._raw_data["dryContacts"]:

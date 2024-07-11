@@ -54,7 +54,6 @@ class FenotekAccount:
         """Update all doorbells data."""
         for doorbell in self._doorbells:
             await doorbell.update()
-            # import ipdb;ipdb.set_trace()
 
     @property
     def doorbells(self) -> list[Doorbell]:

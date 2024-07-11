@@ -115,17 +115,6 @@ class Notification:
         notification_raw_data: VisiophoneHomeNotificationResponse,
     ) -> "Notification":
         """Create new notification object."""
-        if notification_raw_data.get("detail", {}).get("type") not in (
-            0,
-            11,
-            10,
-            3,
-            8,
-            7,
-            6,
-        ):
-            print(notification_raw_data)
-            # import ipdb;ipdb.set_trace()
         notif = Notification(
             fenotek_client=fenotek_client,
             id_=notification_raw_data["_id"],

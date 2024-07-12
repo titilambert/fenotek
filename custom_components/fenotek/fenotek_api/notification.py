@@ -27,10 +27,15 @@ class NotificationSubType(Enum):
 
     UNKNOWN = -1
     MOTION_IMAGE = 0
+    UNKNOWN1 = 1  # TODO: what is that ?
+    UNKNOWN2 = 2  # TODO: what is that ?
     ANSWERED_CALL = 3
+    UNKNOWN4 = 4  # TODO: what is that ?
+    MONITORING = 5  # TODO: what is that ?
     RING = 6
     SHAKED = 7  # TODO: validate that
     MISSED_CALL = 8
+    UNKNOWN9 = 9  # TODO: what is that ?
     ACTIVATION = 10
     MOTION_VIDEO = 11
     DOORBELL_UNREACHABLE = 12
